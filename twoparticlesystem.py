@@ -93,7 +93,7 @@ class Energies:
 
 class TwoParticleSystem:
 
-    def __init__(self,Nmax,g,eps=0.1,cutoff=10,EnergyCutoff=False):#input is -1/g
+    def __init__(self,g):#input is -1/g
         ##initialize all energies and eigenvectors. Nmax is the number of even parity states computed. g is the interaction.
 
         self.energies=Energies(-1./g)
@@ -175,14 +175,14 @@ class TwoParticleSystem:
 
 class TwoParticleTest(unittest.TestCase):
     def setUp(self):
-        self.T1=TwoParticleSystem(10,-1000)
-        self.T2=TwoParticleSystem(10,-100)
-        self.T3=TwoParticleSystem(10,-10)
-        self.T4=TwoParticleSystem(10,-1)
-        self.T5=TwoParticleSystem(10,-0.1)
-        self.T6=TwoParticleSystem(10,-0.01)
-        self.T7=TwoParticleSystem(10,-0.001)
-        self.T8=TwoParticleSystem(10,-0.0001)
+        self.T1=TwoParticleSystem(-1000)
+        self.T2=TwoParticleSystem(-100)
+        self.T3=TwoParticleSystem(-10)
+        self.T4=TwoParticleSystem(-1)
+        self.T5=TwoParticleSystem(-0.1)
+        self.T6=TwoParticleSystem(-0.01)
+        self.T7=TwoParticleSystem(-0.001)
+        self.T8=TwoParticleSystem(-0.0001)
 
 
     def test_approximate_values_small_g(self):
@@ -270,7 +270,7 @@ if __name__=="__main__":
 #    pl.ylim([-10,10])
 #    pl.xlim([-1,15])
 
-    T=TwoParticleSystem(10,-2./5)
+    T=TwoParticleSystem(-2./5)
 
     e=np.linspace(-1,50,1000)
     v=np.zeros(1000)
@@ -310,7 +310,7 @@ if __name__=="__main__":
     print((11.5-T.energies._approximate_value_large_g(10))/(11.5-T.energies[10]),(11.5-T.energies[10]))
 
 
-    T=TwoParticleSystem(10,-10000)
+    T=TwoParticleSystem(-10000)
     print((0.5-T.energies[0])/(0.5-T.energies._approximate_value_small_g(0)),T.energies._approximate_value_small_g(0))
     print((2.5-T.energies[2])/(2.5-T.energies._approximate_value_small_g(2)),T.energies._approximate_value_small_g(2))
     print((4.5-T.energies[4])/(4.5-T.energies._approximate_value_small_g(4)),T.energies._approximate_value_small_g(4))
@@ -332,7 +332,7 @@ if __name__=="__main__":
     pl.show()
 
 
-    T=TwoParticleSystem(10,-100*np.sqrt(2))
+    T=TwoParticleSystem(-100*np.sqrt(2))
     print(T.energies+0.5)
     asds
     T=TwoPar

@@ -4,21 +4,23 @@
 #-------author: Jonathan Lindgren----------------------------------------------------------
 #------------------------------------------------------------------------------------------
 
-
-
-from scipy.optimize import brentq
-import numpy as np
-from math import gamma, factorial,sqrt
-from scipy.special import psi, hyperu, hermite
-import sys
-import pylab as pl
-
 from functools import lru_cache
+from math import gamma, factorial,sqrt
+
+import numpy as np
+import pylab as pl
+from scipy.optimize import brentq
+from scipy.special import psi, hyperu, hermite
 import unittest
+
+
+
+
 
 
 class Energies:
 
+    #computes the ratio Gamma(X+a)/Gamma(X+b)
     @staticmethod
     def _gamma_ratio(X,a,b):
         if ((X+b)%1==0.0):
@@ -29,7 +31,8 @@ class Energies:
             X-=1
         return gamma(X+a)/gamma(X+b)*res
 
-    def _fun(self,E):##equation in the Busch formula
+    #equation in the Busch formula to find the energy
+    def _fun(self,E):
         g=self.g
 #        if (E>0)and(E%2==0.5):
 #            return -g/2/np.sqrt(2)
@@ -48,6 +51,7 @@ class Energies:
         self.rtol=rtol
         self.maxiter=maxiter
 
+    #approximate value for energy at large interaction
     def _approximate_value_large_g(self,n):
         b=1
         for i in range(1,n//2+1):
@@ -55,24 +59,41 @@ class Energies:
         return n+3./2-2*np.sqrt(2)/self.g*b/np.sqrt(np.pi)
 
 
+
+    #upper limit to use in the solver for repulsive interactions
     def _safe_upper_limit(self,n):
         return max(n+3./2-1e-3,n+3./2-(n+3./2-self._approximate_value_large_g(n))/5)
-    
 
+    #lower limit to use in the solver for attractive interactions
+    def _safe_lower_limit(self,n):
+        return min(n-0.5+1e-3,n-0.5-(n-0.5-self._approximate_value_large_g(n-2))/5)    
+
+    #approximate value for weak interactions
     def _approximate_value_small_g(self,n):
         psi0=hermite(n)(0)*1/np.pi**0.25/np.sqrt(2**(n)*factorial(n))
         return n+0.5+self.g*psi0**2/np.sqrt(2)
 
 
+    #function for obtaining any energy level
     @lru_cache(maxsize=32)
     def _get_energy(self,n):
         if n%2==1:
             return n+0.5
         else:
-            if (self.g==0):
-                return n+0.5
+            if (-1e-10<self.g<1e-10):
+                return self._approximate_value_small_g(n)
             else:
-                return brentq(lambda x: self._fun(x),n+0.5,n+1.5-1e-7,xtol=self.xtol,rtol=self.rtol,maxiter=self.maxiter)
+                if self.g>0:
+                    return brentq(lambda x: self._fun(x),n+0.5,self._safe_upper_limit(n),xtol=self.xtol,rtol=self.rtol,maxiter=self.maxiter)
+                else:
+                    if n==0:
+                        e_min=-1;
+                        while self._fun(e_min)<0:
+                            e_min*=2
+                        return brentq(lambda x: self._fun(x),e_min,n+.5,xtol=self.xtol,rtol=self.rtol,maxiter=self.maxiter)
+                    else:
+                        print(n+0.5,self._safe_lower_limit(n))
+                        return brentq(lambda x: self._fun(x),self._safe_lower_limit(n),n+.5,xtol=self.xtol,rtol=self.rtol,maxiter=self.maxiter)
 
     def __getitem__(self,key):
         if isinstance(key,slice):
@@ -118,18 +139,22 @@ class TwoParticleSystem:
         self.xs=np.array(xr)
 
     
-        self.g=g
+        self.g=-1./g
 
 
-
+    #the relative wavefunction for an even state with energy e
     def relative_wavefunction_even(self,e,x):
+
         A=np.sqrt(np.sqrt(2)*2/self.g)/np.sqrt(psi(-e/2+1./4)-psi(-e/2+3./4))
         return -A*self.g/np.sqrt(2*np.pi)/2*gamma(-e/2+1./4)*np.exp(-x**2/2)*hyperu(-e/2+1./4,1./2,x**2)
 
-    def free_wavefunction(self,n,x):
+    #the well known wavefunction for a free harmonic oscillator
+    @staticmethod
+    def _free_wavefunction(n,x):
         return hermite(n)(x)*1/np.pi**0.25*np.exp(-x**2/2)/np.sqrt(2**n*factorial(n))
 
 
+    #relative wavefunction for the n:th state
     def relative_wavefunction(self,n,x):
         if type(n)!=int:
             raise TypeError("index must be integer, not "+str(type(n)))
@@ -139,9 +164,9 @@ class TwoParticleSystem:
             e=self.energies._get_energy(n)
             return self.relative_wavefunction_even(e,x)
         else:
-            return self.free_wavefunction(n,x)
+            return TwoParticleSystem._free_wavefunction(n,x)
 
-    
+    #total wavefunction as a function of the position space coordinates of the two particles, for the state with relative excitation n_rel and center of mass excitation n_cm
     def absolute_wavefunction(self,x,y,n_rel,n_cm):
         if type(n_rel)!=int:
             raise TypeError("n_rel must be integer, not "+str(type(n)))
@@ -152,8 +177,9 @@ class TwoParticleSystem:
         if n_cm<0:
             raise ValueError("n_rel must not be negative")
 
-        return self.relative_wavefunction(self.energies[n_rel],(x-y)/np.sqrt(2))*self.free_wavefunction(n_cm,(x+y)/np.sqrt(2))
+        return self.relative_wavefunction(self.energies[n_rel],(x-y)/np.sqrt(2))*TwoParticleSystem._free_wavefunction(n_cm,(x+y)/np.sqrt(2))
 
+    #position space density for the state with relative excitation n_rel and center of mass excitation n_cm
     def density(self,x,n_rel,n_cm):
         if type(n_rel)!=int:
             raise TypeError("n_rel must be integer, not "+str(type(n)))
@@ -167,7 +193,7 @@ class TwoParticleSystem:
         y=np.zeros_like(x)
         
         for i,_x in enumerate(x):    
-            y[i]=np.dot(self.Int,self.relative_wavefunction(n_rel,(_x-self.xs)/np.sqrt(2))**2*self.free_wavefunction(n_cm,(_x+self.xs)/np.sqrt(2))**2)
+            y[i]=np.dot(self.Int,self.relative_wavefunction(n_rel,(_x-self.xs)/np.sqrt(2))**2*TwoParticleSystem._free_wavefunction(n_cm,(_x+self.xs)/np.sqrt(2))**2)
         
         return y
 
@@ -237,11 +263,11 @@ class TwoParticleTest(unittest.TestCase):
         norm = sum(self.T7.relative_wavefunction_even(self.T7.energies[4],x)**2*(x[1]-x[0]))
         self.assertAlmostEqual(norm,1,3)
 
-        norm = sum(self.T4.density(self.T7.energies[0],x)*(x[1]-x[0]))
+        norm = sum(self.T4.density(x,0,0)*(x[1]-x[0]))
         self.assertAlmostEqual(norm,1,3)
-        norm = sum(self.T4.density(self.T7.energies[2],x)*(x[1]-x[0]))
+        norm = sum(self.T4.density(x,2,0)*(x[1]-x[0]))
         self.assertAlmostEqual(norm,1,3)
-        norm = sum(self.T4.density(self.T7.energies[4],x)*(x[1]-x[0]))
+        norm = sum(self.T4.density(x,0,2)*(x[1]-x[0]))
         self.assertAlmostEqual(norm,1,3)
 
     
@@ -249,7 +275,7 @@ class TwoParticleTest(unittest.TestCase):
 if __name__=="__main__":
 
 #    unittest.main()
-
+#    asd
     x=np.linspace(-5,5,1000)
 #    nu=0.123
 #    y=hyperu(nu,.5,x**2)*np.exp(-x**2/2)
@@ -270,19 +296,46 @@ if __name__=="__main__":
 #    pl.ylim([-10,10])
 #    pl.xlim([-1,15])
 
-    T=TwoParticleSystem(-2./5)
 
-    e=np.linspace(-1,50,1000)
-    v=np.zeros(1000)
-    for i in range(1000):
-        v[i]=T.energies._fun(e[i])
-    pl.plot(e,v)
-    for i in range(50):
-        pl.plot([i*2+1.5,i*2+1.5],[-10,10],'--')
-    pl.plot([-1,50],[0,0],'--')
-    pl.ylim([-10,10])
-    pl.xlim([-1,15])
-    
+#    T=TwoParticleSystem(-1e11)
+#    print(T.energies[4])
+#    print(T.energies[2])
+#    print(T.energies[0])
+#    T=TwoParticleSystem(1e11)
+#    print(T.energies[4])
+#    print(T.energies[2])
+#    print(T.energies[0])
+#    asd
+
+#    n=10
+#    g=np.linspace(-10,-0.001,100)
+#    E=np.zeros((10,100))
+#    for i in range(100):
+#        T=TwoParticleSystem(g[i])
+#        for j in range(n):
+#            E[j,i]=T.energies[j*2]
+#    col=['g','r','b','k','m','--g','--r','--b','--k','--m']
+#    for j in range(n):
+#        pl.plot(g,E[j,:]-j*2,col[j])
+#    pl.show()
+
+    for g in [2./5*100,2./10,-2./10,-100]:
+        T=TwoParticleSystem(g)
+        print(g,T.energies._safe_lower_limit(2),T.energies._safe_lower_limit(4))
+        print(g,T.energies._safe_upper_limit(2),T.energies._safe_upper_limit(4))
+        pl.figure()
+        pl.title(g)
+        e=np.linspace(-1,50,1000)
+        v=np.zeros(1000)
+        for i in range(1000):
+            v[i]=T.energies._fun(e[i])
+        pl.plot(e,v)
+        for i in range(50):
+            pl.plot([i*2+1.5,i*2+1.5],[-10,10],'--')
+        pl.plot([-1,50],[0,0],'--')
+        pl.ylim([-10,10])
+        pl.xlim([-1,15])
+    pl.show()    
 
     x=np.linspace(-10,10,1000)
     y=T.density(x,0,0)

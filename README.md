@@ -3,7 +3,7 @@ Python module for computing energies and wavefunctions for two particles in harm
 
 The motion of the particles can be separated into the relative motion and the center of mass motion. The center of mass motion is not affected by the interaction (thus always given by that of a free harmonic oscillator), while the relative motion is affected by the interaction (although the odd states are not). Thus a state can either be specified by a relative motion quantum number n_rel and a center of mass quantum number n_cm.
 
-#How to use it
+## How to use it
 
 First initialize a TwoParticleSystem object with interaction strength g, by calling the constructor with parameter -1/g. For example,
 ```

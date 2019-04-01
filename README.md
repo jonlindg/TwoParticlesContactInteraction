@@ -5,9 +5,9 @@ The motion of the particles can be separated into the relative motion and the ce
 
 ## How to use it
 
-First initialize a TwoParticleSystem object with interaction strength g, by calling the constructor with parameter -1/g. For example,
+First initialize a TwoParticleSystem object with interaction strength g:
 ```
-T=TwoParticleSystem(-0.1)
+T=TwoParticleSystem(10)
 ```
 initializes a system with g=10.
 

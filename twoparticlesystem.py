@@ -92,7 +92,7 @@ class Energies:
                             e_min*=2
                         return brentq(lambda x: self._fun(x),e_min,n+.5,xtol=self.xtol,rtol=self.rtol,maxiter=self.maxiter)
                     else:
-                        print(n+0.5,self._safe_lower_limit(n))
+                        print(n+0.5,self._safe_lower_limit(n),self.g)
                         return brentq(lambda x: self._fun(x),self._safe_lower_limit(n),n+.5,xtol=self.xtol,rtol=self.rtol,maxiter=self.maxiter)
 
     def __getitem__(self,key):
@@ -117,7 +117,7 @@ class TwoParticleSystem:
     def __init__(self,g):#input is -1/g
         ##initialize all energies and eigenvectors. Nmax is the number of even parity states computed. g is the interaction.
 
-        self.energies=Energies(-1./g)
+        self.energies=Energies(g)
 
         #integration tools
         nI=250
@@ -139,7 +139,7 @@ class TwoParticleSystem:
         self.xs=np.array(xr)
 
     
-        self.g=-1./g
+        self.g=g
 
 
     #the relative wavefunction for an even state with energy e
@@ -198,194 +198,5 @@ class TwoParticleSystem:
         return y
 
 
-
-class TwoParticleTest(unittest.TestCase):
-    def setUp(self):
-        self.T1=TwoParticleSystem(-1000)
-        self.T2=TwoParticleSystem(-100)
-        self.T3=TwoParticleSystem(-10)
-        self.T4=TwoParticleSystem(-1)
-        self.T5=TwoParticleSystem(-0.1)
-        self.T6=TwoParticleSystem(-0.01)
-        self.T7=TwoParticleSystem(-0.001)
-        self.T8=TwoParticleSystem(-0.0001)
-
-
-    def test_approximate_values_small_g(self):
-        self.assertAlmostEqual((0.5-self.T1.energies[0])/(0.5-self.T1.energies._approximate_value_small_g(0)),1.,3)
-        self.assertAlmostEqual((2.5-self.T1.energies[2])/(2.5-self.T1.energies._approximate_value_small_g(2)),1.,3)
-        self.assertAlmostEqual((4.5-self.T1.energies[4])/(4.5-self.T1.energies._approximate_value_small_g(4)),1.,3)
-        self.assertAlmostEqual((6.5-self.T1.energies[6])/(6.5-self.T1.energies._approximate_value_small_g(6)),1.,3)
-        self.assertAlmostEqual((0.5-self.T2.energies[0])/(0.5-self.T2.energies._approximate_value_small_g(0)),1.,2)
-        self.assertAlmostEqual((2.5-self.T2.energies[2])/(2.5-self.T2.energies._approximate_value_small_g(2)),1.,2)
-        self.assertAlmostEqual((4.5-self.T2.energies[4])/(4.5-self.T2.energies._approximate_value_small_g(4)),1.,2)
-        self.assertAlmostEqual((6.5-self.T2.energies[6])/(6.5-self.T2.energies._approximate_value_small_g(6)),1.,2)
-
-    def test_approximate_values_large_g(self):
-        self.assertAlmostEqual((1.5-self.T7.energies[0])/(1.5-self.T7.energies._approximate_value_large_g(0)),1.,3)
-        self.assertAlmostEqual((3.5-self.T7.energies[2])/(3.5-self.T7.energies._approximate_value_large_g(2)),1.,3)
-        self.assertAlmostEqual((5.5-self.T7.energies[4])/(5.5-self.T7.energies._approximate_value_large_g(4)),1.,3)
-        self.assertAlmostEqual((7.5-self.T7.energies[6])/(7.5-self.T7.energies._approximate_value_large_g(6)),1.,3)
-        self.assertAlmostEqual((1.5-self.T8.energies[0])/(1.5-self.T8.energies._approximate_value_large_g(0)),1.,4)
-        self.assertAlmostEqual((3.5-self.T8.energies[2])/(3.5-self.T8.energies._approximate_value_large_g(2)),1.,4)
-        self.assertAlmostEqual((5.5-self.T8.energies[4])/(5.5-self.T8.energies._approximate_value_large_g(4)),1.,4)
-        self.assertAlmostEqual((7.5-self.T8.energies[6])/(7.5-self.T8.energies._approximate_value_large_g(6)),1.,4)
-
-    def test_upper_limit(self):
-        for T in [self.T1,self.T2,self.T3,self.T4,self.T5,self.T6,self.T7,self.T8]:
-            self.assertTrue(T.energies._approximate_value_large_g(0)<T.energies._safe_upper_limit(0))
-            self.assertTrue(T.energies._approximate_value_large_g(2)<T.energies._safe_upper_limit(2))
-            self.assertTrue(T.energies._approximate_value_large_g(8)<T.energies._safe_upper_limit(8))
-            self.assertTrue(T.energies[0]<T.energies._safe_upper_limit(0))
-            self.assertTrue(T.energies[2]<T.energies._safe_upper_limit(2))
-            self.assertTrue(T.energies[8]<T.energies._safe_upper_limit(8))
-
-    def test_normalization(self):
-        x=np.linspace(-10,10,1000)
-        norm = sum(self.T2.relative_wavefunction_even(self.T2.energies[0],x)**2*(x[1]-x[0]))
-        self.assertAlmostEqual(norm,1,3)
-        norm = sum(self.T2.relative_wavefunction_even(self.T2.energies[2],x)**2*(x[1]-x[0]))
-        self.assertAlmostEqual(norm,1,3)
-        norm = sum(self.T2.relative_wavefunction_even(self.T2.energies[4],x)**2*(x[1]-x[0]))
-        self.assertAlmostEqual(norm,1,3)
-
-        norm = sum(self.T4.relative_wavefunction_even(self.T4.energies[0],x)**2*(x[1]-x[0]))
-        self.assertAlmostEqual(norm,1,3)
-        norm = sum(self.T4.relative_wavefunction_even(self.T4.energies[2],x)**2*(x[1]-x[0]))
-        self.assertAlmostEqual(norm,1,3)
-        norm = sum(self.T4.relative_wavefunction_even(self.T4.energies[4],x)**2*(x[1]-x[0]))
-        self.assertAlmostEqual(norm,1,3)
-
-        norm = sum(self.T7.relative_wavefunction_even(self.T7.energies[0],x)**2*(x[1]-x[0]))
-        self.assertAlmostEqual(norm,1,3)
-        norm = sum(self.T7.relative_wavefunction_even(self.T7.energies[2],x)**2*(x[1]-x[0]))
-        self.assertAlmostEqual(norm,1,3)
-        norm = sum(self.T7.relative_wavefunction_even(self.T7.energies[4],x)**2*(x[1]-x[0]))
-        self.assertAlmostEqual(norm,1,3)
-
-        norm = sum(self.T4.density(x,0,0)*(x[1]-x[0]))
-        self.assertAlmostEqual(norm,1,3)
-        norm = sum(self.T4.density(x,2,0)*(x[1]-x[0]))
-        self.assertAlmostEqual(norm,1,3)
-        norm = sum(self.T4.density(x,0,2)*(x[1]-x[0]))
-        self.assertAlmostEqual(norm,1,3)
-
     
 
-if __name__=="__main__":
-
-#    unittest.main()
-#    asd
-    x=np.linspace(-5,5,1000)
-#    nu=0.123
-#    y=hyperu(nu,.5,x**2)*np.exp(-x**2/2)
-#    pl.plot(x,y)
-#    pl.show()
-
-
-
-
-#    e=np.linspace(-1,50,1000)
-#    v=np.zeros(1000)
-#    for i in range(1000):
-#        v[i]=fun(e[i],-1/(-0.1*10))
-#    pl.plot(e,v)
-#    for i in range(50):
-#        pl.plot([i*2+1,i*2+1],[-10,10],'--')
-#    pl.plot([-1,50],[0,0],'--')
-#    pl.ylim([-10,10])
-#    pl.xlim([-1,15])
-
-
-#    T=TwoParticleSystem(-1e11)
-#    print(T.energies[4])
-#    print(T.energies[2])
-#    print(T.energies[0])
-#    T=TwoParticleSystem(1e11)
-#    print(T.energies[4])
-#    print(T.energies[2])
-#    print(T.energies[0])
-#    asd
-
-#    n=10
-#    g=np.linspace(-10,-0.001,100)
-#    E=np.zeros((10,100))
-#    for i in range(100):
-#        T=TwoParticleSystem(g[i])
-#        for j in range(n):
-#            E[j,i]=T.energies[j*2]
-#    col=['g','r','b','k','m','--g','--r','--b','--k','--m']
-#    for j in range(n):
-#        pl.plot(g,E[j,:]-j*2,col[j])
-#    pl.show()
-
-    for g in [2./5*100,2./10,-2./10,-100]:
-        T=TwoParticleSystem(g)
-        print(g,T.energies._safe_lower_limit(2),T.energies._safe_lower_limit(4))
-        print(g,T.energies._safe_upper_limit(2),T.energies._safe_upper_limit(4))
-        pl.figure()
-        pl.title(g)
-        e=np.linspace(-1,50,1000)
-        v=np.zeros(1000)
-        for i in range(1000):
-            v[i]=T.energies._fun(e[i])
-        pl.plot(e,v)
-        for i in range(50):
-            pl.plot([i*2+1.5,i*2+1.5],[-10,10],'--')
-        pl.plot([-1,50],[0,0],'--')
-        pl.ylim([-10,10])
-        pl.xlim([-1,15])
-    pl.show()    
-
-    x=np.linspace(-10,10,1000)
-    y=T.density(x,0,0)
-    pl.figure()
-    pl.plot(x,y)
-    pl.show()
-
-
-
-    print(T.energies[0])
-    print(T.energies[1])
-    print(T.energies[2])
-    print(T.energies[3])
-    print(T.energies[4])
-    print(T.energies[5])
-
-    
-
-
-    print((1.5-T.energies._approximate_value_large_g(0))/(1.5-T.energies[0]),(1.5-T.energies[0]))
-    print((3.5-T.energies._approximate_value_large_g(2))/(3.5-T.energies[2]),(3.5-T.energies[2]))
-    print((5.5-T.energies._approximate_value_large_g(4))/(5.5-T.energies[4]),(5.5-T.energies[4]))
-    print((7.5-T.energies._approximate_value_large_g(6))/(7.5-T.energies[6]),(7.5-T.energies[6]))
-    print((9.5-T.energies._approximate_value_large_g(8))/(9.5-T.energies[8]),(9.5-T.energies[8]))
-    print((11.5-T.energies._approximate_value_large_g(10))/(11.5-T.energies[10]),(11.5-T.energies[10]))
-
-
-    T=TwoParticleSystem(-10000)
-    print((0.5-T.energies[0])/(0.5-T.energies._approximate_value_small_g(0)),T.energies._approximate_value_small_g(0))
-    print((2.5-T.energies[2])/(2.5-T.energies._approximate_value_small_g(2)),T.energies._approximate_value_small_g(2))
-    print((4.5-T.energies[4])/(4.5-T.energies._approximate_value_small_g(4)),T.energies._approximate_value_small_g(4))
-
-
-    hggh
-#    for e in T.energies:
-#        print(e,0)
-#        if (e>5):
-#            break
-#    print(T.energies[0:6:2])
-
-    asd
-    x=np.linspace(-10,10,100000)
-    y=T.relative_wavefunction_even(T.energies[0],x)
-    print(sum(y**2)*(x[1]-x[0]))
-    pl.figure()
-    pl.plot(x,y)
-    pl.show()
-
-
-    T=TwoParticleSystem(-100*np.sqrt(2))
-    print(T.energies+0.5)
-    asds
-    T=TwoPar

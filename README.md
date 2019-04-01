@@ -43,4 +43,4 @@ y=T.relative_wavefunction(0,x)
 print(y)
 > [0.63052561 0.53591595 0.13932756 0.53591595 0.63052561]
 ```
-Total wavefunction of two coordinates can be accessed using absolute_wavefunction, specifying the relative motion quantum number n_rel and the center of motion quantum number n_cm, as well as the points x and y on which to evaluate the wavefunction. One particle densities are computed via the density method, specifying n_rel, n_cm and a set of points x.
+Total wavefunction of two coordinates can be accessed using absolute_wavefunction, specifying the relative motion quantum number n_rel and the center of motion quantum number n_cm, as well as the points x and y on which to evaluate the wavefunction. One particle densities are computed via the density method, specifying n_rel, n_cm and a set of points x. See plot_energies.py and plot_density.py for more examples.

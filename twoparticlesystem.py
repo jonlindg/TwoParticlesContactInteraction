@@ -197,6 +197,44 @@ class TwoParticleSystem:
         
         return y
 
+    #computes the quantum numbers n_rel and n_cm for the state with absolute quantum number n (the state which has the n:th lowest total energy). Only implemented for repulsive interactions
+    def from_absolute_index(self,n):
+        if (self.g<0):
+            print("function from_absolute_index is only available for repulsive interaction")
+            return None,None
+
+        raise NotImplementedError
 
     
+
+
+
+
+T=TwoParticleSystem(10)
+x=np.linspace(-1,1,5)
+y=T.relative_wavefunction(0,x)
+print(y)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

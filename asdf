@@ -1,0 +1,125 @@
+
+if __name__=="__main__":
+
+#    unittest.main()
+#    asd
+    x=np.linspace(-5,5,1000)
+#    nu=0.123
+#    y=hyperu(nu,.5,x**2)*np.exp(-x**2/2)
+#    pl.plot(x,y)
+#    pl.show()
+
+    T=TwoParticleSystem(-0.1)
+    e0=T.energies[0]
+    print(e0)
+    for e in T.energies:
+        print(e)
+        if e>5:
+            break
+    asd
+
+
+#    e=np.linspace(-1,50,1000)
+#    v=np.zeros(1000)
+#    for i in range(1000):
+#        v[i]=fun(e[i],-1/(-0.1*10))
+#    pl.plot(e,v)
+#    for i in range(50):
+#        pl.plot([i*2+1,i*2+1],[-10,10],'--')
+#    pl.plot([-1,50],[0,0],'--')
+#    pl.ylim([-10,10])
+#    pl.xlim([-1,15])
+
+
+#    T=TwoParticleSystem(-1e11)
+#    print(T.energies[4])
+#    print(T.energies[2])
+#    print(T.energies[0])
+#    T=TwoParticleSystem(1e11)
+#    print(T.energies[4])
+#    print(T.energies[2])
+#    print(T.energies[0])
+#    asd
+
+#    n=10
+#    g=np.linspace(-10,-0.001,100)
+#    E=np.zeros((10,100))
+#    for i in range(100):
+#        T=TwoParticleSystem(g[i])
+#        for j in range(n):
+#            E[j,i]=T.energies[j*2]
+#    col=['g','r','b','k','m','--g','--r','--b','--k','--m']
+#    for j in range(n):
+#        pl.plot(g,E[j,:]-j*2,col[j])
+#    pl.show()
+
+    for g in [2./5*100,2./10,-2./10,-100]:
+        T=TwoParticleSystem(g)
+        print(g,T.energies._safe_lower_limit(2),T.energies._safe_lower_limit(4))
+        print(g,T.energies._safe_upper_limit(2),T.energies._safe_upper_limit(4))
+        pl.figure()
+        pl.title(g)
+        e=np.linspace(-1,50,1000)
+        v=np.zeros(1000)
+        for i in range(1000):
+            v[i]=T.energies._fun(e[i])
+        pl.plot(e,v)
+        for i in range(50):
+            pl.plot([i*2+1.5,i*2+1.5],[-10,10],'--')
+        pl.plot([-1,50],[0,0],'--')
+        pl.ylim([-10,10])
+        pl.xlim([-1,15])
+    pl.show()    
+
+    x=np.linspace(-10,10,1000)
+    y=T.density(x,0,0)
+    pl.figure()
+    pl.plot(x,y)
+    pl.show()
+
+
+
+    print(T.energies[0])
+    print(T.energies[1])
+    print(T.energies[2])
+    print(T.energies[3])
+    print(T.energies[4])
+    print(T.energies[5])
+
+    
+
+
+    print((1.5-T.energies._approximate_value_large_g(0))/(1.5-T.energies[0]),(1.5-T.energies[0]))
+    print((3.5-T.energies._approximate_value_large_g(2))/(3.5-T.energies[2]),(3.5-T.energies[2]))
+    print((5.5-T.energies._approximate_value_large_g(4))/(5.5-T.energies[4]),(5.5-T.energies[4]))
+    print((7.5-T.energies._approximate_value_large_g(6))/(7.5-T.energies[6]),(7.5-T.energies[6]))
+    print((9.5-T.energies._approximate_value_large_g(8))/(9.5-T.energies[8]),(9.5-T.energies[8]))
+    print((11.5-T.energies._approximate_value_large_g(10))/(11.5-T.energies[10]),(11.5-T.energies[10]))
+
+
+    T=TwoParticleSystem(-10000)
+    print((0.5-T.energies[0])/(0.5-T.energies._approximate_value_small_g(0)),T.energies._approximate_value_small_g(0))
+    print((2.5-T.energies[2])/(2.5-T.energies._approximate_value_small_g(2)),T.energies._approximate_value_small_g(2))
+    print((4.5-T.energies[4])/(4.5-T.energies._approximate_value_small_g(4)),T.energies._approximate_value_small_g(4))
+
+
+    hggh
+#    for e in T.energies:
+#        print(e,0)
+#        if (e>5):
+#            break
+#    print(T.energies[0:6:2])
+
+    asd
+    x=np.linspace(-10,10,100000)
+    y=T.relative_wavefunction_even(T.energies[0],x)
+    print(sum(y**2)*(x[1]-x[0]))
+    pl.figure()
+    pl.plot(x,y)
+    pl.show()
+
+
+    T=TwoParticleSystem(-100*np.sqrt(2))
+    print(T.energies+0.5)
+    asds
+    T=TwoPar

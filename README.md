@@ -1,7 +1,7 @@
 # TwoParticlesContactInteraction
 Python module for computing energies and wavefunctions for two particles in harmonic well with contact interaction.
 
-The motion of the particles can be separated into the relative motion and the center of mass motion. The center of mass motion is not affected by the interaction (thus always given by that of a free harmonic oscillator), while the relative motion is affected by the interaction (although the odd states are not). Thus a state can either be specified by a relative motion quantum number n_rel and a center of mass quantum number n_cm.
+The motion of the particles can be separated into the relative motion and the center of mass motion. The center of mass motion is not affected by the interaction (thus always given by that of a free harmonic oscillator), while the relative motion is affected by the interaction (although the odd states are not). Thus a state can either be specified by a relative motion quantum number n_rel and a center of mass quantum number n_cm, and thus we can associate an energy and a wavefunction both to the relative motion and to the center of mass motion. The total energy is then the sum of these energies, and the total wavefunction is the product.
 
 ## How to use it
 

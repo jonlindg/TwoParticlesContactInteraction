@@ -197,13 +197,53 @@ class TwoParticleSystem:
         
         return y
 
-    #computes the quantum numbers n_rel and n_cm for the state with absolute quantum number n (the state which has the n:th lowest total energy). Only implemented for repulsive interactions
-    def from_absolute_index(self,n):
-        if (self.g<0):
-            print("function from_absolute_index is only available for repulsive interaction")
-            return None,None
+    #computes the quantum numbers n_rel and n_cm for the state with absolute quantum number n (the state which has the n:th lowest total energy). Only available for repulsive interactions due to the collapsing bound state on the attractive side. Since the state might be degenerate, it returns a list of tuples (n_rel,n_cm) which might have more than one element
+    @staticmethod
+    def from_absolute_index_repulsive(n):
+        n=int(n)
 
-        raise NotImplementedError
+        #find energy band
+        x=np.sqrt(2*n+2+1./4)-1./2
+        k=int(np.floor(x))
+        if k*(k+1)>=n*2+2:
+            k=k-1
+        l=n+1-(k*(k+1))//2
+        #n is located on the k:th "energy band", starting from k=0
+        #there are floor((k+1)/2) non interacting states, and then floor(k/2)+1 interacting states
+        if (l<=(k+1)//2):
+            #ambiguous which state, return a list
+            return [(i*2+1,k-i*2-1) for i in range((k+1)//2)]
+        else:
+            #determine which interacting state
+            return [(2*(k//2)-(l-(k+1)//2-1)*2,(l-(k+1)//2-1)*2+(k%2))]
+        
+        
+        
+
+#(0,0)
+#(1,0)
+#(0,1)
+#(1,1)
+#(2,0)
+#(0,2)
+#(3,0),(1,2)
+#(2,1)
+#(0,3)
+#(1,3),(3,1)
+#(4,0)
+#(2,2)
+#(0,4)
+#(1,4),(3,2),(5,0)
+#every odd energy 2k+1, we have (2k+1,0),(2k-1,2),..., thus we have k here, even energy we also have k-1 ie floor((n+1)/2)
+#right above every energy, how many even states, we have floor((n+1)/2)
+#in other words, at every integer energy n, we have exactly floor((n+1)/2)
+#between every state n and n+1, we have k=floor((n)/2+1), they are ordered as (2k-2,0(1)),(2k-4,2(3))... for n even (odd)
+#so, given n:
+#
+
+
+
+        
 
     
 

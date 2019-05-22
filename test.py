@@ -5,14 +5,14 @@ from twoparticlesystem import TwoParticleSystem
 
 class TwoParticleTest(unittest.TestCase):
     def setUp(self):
-        self.T1=TwoParticleSystem(-1000)
-        self.T2=TwoParticleSystem(-100)
-        self.T3=TwoParticleSystem(-10)
-        self.T4=TwoParticleSystem(-1)
-        self.T5=TwoParticleSystem(-0.1)
-        self.T6=TwoParticleSystem(-0.01)
-        self.T7=TwoParticleSystem(-0.001)
-        self.T8=TwoParticleSystem(-0.0001)
+        self.T1=TwoParticleSystem(-1./(-1000))
+        self.T2=TwoParticleSystem(-1./(-100))
+        self.T3=TwoParticleSystem(-1./(-10))
+        self.T4=TwoParticleSystem(-1./(-1))
+        self.T5=TwoParticleSystem(-1./(-0.1))
+        self.T6=TwoParticleSystem(-1./(-0.01))
+        self.T7=TwoParticleSystem(-1./(-0.001))
+        self.T8=TwoParticleSystem(-1./(-0.0001))
 
 
     def test_approximate_values_small_g(self):

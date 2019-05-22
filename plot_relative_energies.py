@@ -2,6 +2,8 @@ import numpy as np
 import pylab as pl
 from twoparticlesystem import TwoParticleSystem
 
+#plot the relative energy spectrum
+
 N=100
 n=7
 es=np.zeros((n,N))
@@ -14,6 +16,7 @@ for i,g in enumerate(gs):
 
 for i in range(n):
     pl.plot(-1/gs,es[i,:])
+
 pl.title('Energy states of the relative motion')
 pl.xlabel('$-1/g$')
 pl.show()

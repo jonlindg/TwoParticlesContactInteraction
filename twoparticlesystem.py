@@ -1,29 +1,26 @@
 #------------------------------------------------------------------------------------------
-#--Python module for calculating energies and wavefunctions--------------------------------
+#-----Python module for calculating energies and wavefunctions-----------------------------
 #-- for two particles with a contact interaction in a harmonic trap------------------------
 #-------author: Jonathan Lindgren----------------------------------------------------------
 #------------------------------------------------------------------------------------------
 
 from functools import lru_cache
 from math import gamma, factorial,sqrt
-
 import numpy as np
-import pylab as pl
 from scipy.optimize import brentq
 from scipy.special import psi, hyperu, hermite
-import unittest
 
 
 
 
 
-
+#class for handling the energies of the two-particle system
 class Energies:
 
     #computes the ratio Gamma(X+a)/Gamma(X+b)
     @staticmethod
     def _gamma_ratio(X,a,b):
-        if ((X+b)%1==0.0):
+        if (abs((X+b)%1)<1e-20):
             return 0
         res=1.
         while (X+a>20)or(X+b>20):
@@ -95,6 +92,7 @@ class Energies:
                         print(n+0.5,self._safe_lower_limit(n),self.g)
                         return brentq(lambda x: self._fun(x),self._safe_lower_limit(n),n+.5,xtol=self.xtol,rtol=self.rtol,maxiter=self.maxiter)
 
+    #[] functionality
     def __getitem__(self,key):
         if isinstance(key,slice):
             return [self._get_energy(i) for i in range(key.start,key.stop,key.step)]
@@ -103,6 +101,7 @@ class Energies:
             raise TypeError("indices must be integers or slices, not "+str(type(key)))
         return self._get_energy(key)
 
+    #iterator protocol
     def __iter__(self):
         self.idx=0
         return self
@@ -112,15 +111,15 @@ class Energies:
         return self.__getitem__(self.idx-1)
 
 
+
+#class for handling a system of two particles in harmonic trap with contact interaction of strength g
 class TwoParticleSystem:
 
-    def __init__(self,g):#input is -1/g
-        ##initialize all energies and eigenvectors. Nmax is the number of even parity states computed. g is the interaction.
+    def __init__(self,g,nI=250):
 
         self.energies=Energies(g)
 
         #integration tools
-        nI=250
         t=np.linspace(-np.pi/2,np.pi/2,nI+2)[1:-1]
         xr=np.tan(t)
         A=np.zeros((nI,nI))
@@ -133,7 +132,6 @@ class TwoParticleSystem:
             A[i,i-1]+=2*dx/3
             A[i,i]+=dx/6
         A=A/np.cos(t)**2
-        INT=A
 
         self.Int=A[-1,:]
         self.xs=np.array(xr)
